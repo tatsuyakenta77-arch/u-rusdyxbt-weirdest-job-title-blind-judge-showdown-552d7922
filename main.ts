@@ -42,15 +42,14 @@ import { join } from "node:path";
 const title = "Senior Sorry Writer for Billionaires";
 const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
 
-// The gate allows 1–60 characters of UTF-8 text, not only
-// whitespace, on a single line — and the judge's first criterion is
-// that the text IS a weird job title, a few words naming an odd
-// job, so the code enforces the shape too: one line, inside the
-// limit, no leading or trailing whitespace. Refuse to ship anything
-// outside that: a second line would stop being one title, and
-// padding past 60 characters would fail the gate outright.
-if (title.length < 1 || title.length > 60) {
-  throw new Error(`entry title is ${title.length} characters, outside the 1-60 limit`);
+// The gate counts characters, not UTF-16 code units: count code
+// points, so a title with a character outside the BMP could never
+// slip past the limit on a technicality. (This title is plain
+// ASCII, so the two counts agree here — the check is written for
+// the gate's definition, not for this one string.)
+const charCount = [...title].length;
+if (charCount < 1 || charCount > 60) {
+  throw new Error(`entry title is ${charCount} characters, outside the 1-60 limit`);
 }
 if (title.trim().length === 0 || /[\r\n]/.test(title)) {
   throw new Error("entry title must be one non-blank line");
